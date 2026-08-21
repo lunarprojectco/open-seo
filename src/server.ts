@@ -186,6 +186,8 @@ export { OnboardingChatAgent } from "./server/features/onboarding/OnboardingChat
 export { SamChatAgent } from "./server/features/sam/SamChatAgent";
 // Durable Object class for the per-audit crawl scratchpad.
 export { AuditScratchpad } from "./server/features/audit/AuditScratchpad";
+// Global operator-sponsored public-audit budget ledger.
+export { PublicWidgetAuditBudget } from "./server/features/widget-audit/PublicWidgetAuditBudget";
 
 // Daily OAuth KV garbage collection; must match a trigger in wrangler.jsonc.
 const MCP_OAUTH_PURGE_CRON = "17 3 * * *";

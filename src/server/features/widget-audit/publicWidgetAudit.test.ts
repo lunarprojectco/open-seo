@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import {
   createPublicWidgetAuditHandler,
   PublicWidgetAuditError,
@@ -7,9 +7,22 @@ import {
 
 const fixedNow = new Date("2026-08-20T12:00:00.000Z");
 
+type AvailableSearchObservation = Extract<
+  SearchOverviewObservation,
+  { status: "AVAILABLE" | "NO_DATA" }
+>;
+
+type SearchOverviewGateway = (input: {
+  domain: string;
+  request: Request;
+  turnstileToken?: string;
+}) => Promise<SearchOverviewObservation>;
+
+type SearchOverviewGatewayMock = Mock<SearchOverviewGateway>;
+
 function searchObservation(
-  overrides: Partial<SearchOverviewObservation> = {},
-): SearchOverviewObservation {
+  overrides: Partial<AvailableSearchObservation> = {},
+): AvailableSearchObservation {
   return {
     status: "AVAILABLE",
     organicTraffic: 321,
@@ -28,7 +41,9 @@ function searchObservation(
 }
 
 function createHandler(
-  getSearchOverview = vi.fn(async () => searchObservation()),
+  getSearchOverview: SearchOverviewGatewayMock = vi.fn<SearchOverviewGateway>(
+    async () => searchObservation(),
+  ),
 ) {
   const onError = vi.fn();
   return {
@@ -92,6 +107,48 @@ describe("public widget audit handler", () => {
     );
   });
 
+  it("represents a policy-disabled hosted search layer without fabricating zeroes", async () => {
+    const { handler } = createHandler(
+      vi.fn(async () => ({
+        status: "NOT_RUN",
+        organicTraffic: null,
+        organicKeywords: null,
+        fetchedAt: null,
+        dataAsOf: null,
+        provider: null,
+        integration: null,
+        sourceClass: null,
+        locationCode: 2124,
+        locationLabel: "Canada",
+        languageCode: "en",
+        completeness: "unknown",
+        reason: "Hosted paid acquisition is not enabled.",
+      })),
+    );
+
+    const response = await handler(
+      new Request("https://app.openseo.so/api/widget/audit", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ domain: "example.com" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      layers: {
+        search: {
+          status: "NOT_RUN",
+          organicTraffic: null,
+          organicKeywords: null,
+          provider: null,
+          reconciliationStatus: "UNAVAILABLE",
+          confidence: null,
+        },
+      },
+    });
+  });
+
   it("rejects malformed and unknown-field input before provider execution", async () => {
     const { handler, getSearchOverview } = createHandler();
     const malformed = await handler(
@@ -114,6 +171,20 @@ describe("public widget audit handler", () => {
       }),
     );
     expect(unknownField.status).toBe(400);
+    expect(getSearchOverview).not.toHaveBeenCalled();
+  });
+
+  it("stops reading a request body after the public byte limit", async () => {
+    const { handler, getSearchOverview } = createHandler();
+    const response = await handler(
+      new Request("https://app.openseo.so/api/widget/audit", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ domain: "a".repeat(17_000) }),
+      }),
+    );
+
+    expect(response.status).toBe(413);
     expect(getSearchOverview).not.toHaveBeenCalled();
   });
 

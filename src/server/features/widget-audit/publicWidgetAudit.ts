@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const MAX_REQUEST_BODY_CHARACTERS = 16_384;
+const MAX_REQUEST_BODY_BYTES = 16_384;
 export const PUBLIC_WIDGET_AUDIT_TURNSTILE_ACTION = "public_widget_audit";
 
 const requestSchema = z
@@ -12,20 +12,37 @@ const requestSchema = z
   })
   .strict();
 
-export const searchOverviewObservationSchema = z.object({
-  status: z.enum(["AVAILABLE", "NO_DATA"]),
-  organicTraffic: z.number().int().nonnegative().nullable(),
-  organicKeywords: z.number().int().nonnegative().nullable(),
-  fetchedAt: z.string().datetime(),
-  dataAsOf: z.string().datetime().nullable(),
-  provider: z.literal("dataforseo"),
-  integration: z.literal("domain_rank_overview_live"),
-  sourceClass: z.literal("estimated"),
-  locationCode: z.number().int().positive(),
-  locationLabel: z.string().min(1),
-  languageCode: z.string().min(1),
-  completeness: z.enum(["complete", "partial", "unknown"]),
-});
+export const searchOverviewObservationSchema = z.discriminatedUnion("status", [
+  z.object({
+    status: z.enum(["AVAILABLE", "NO_DATA"]),
+    organicTraffic: z.number().int().nonnegative().nullable(),
+    organicKeywords: z.number().int().nonnegative().nullable(),
+    fetchedAt: z.string().datetime(),
+    dataAsOf: z.string().datetime().nullable(),
+    provider: z.literal("dataforseo"),
+    integration: z.literal("domain_rank_overview_live"),
+    sourceClass: z.literal("estimated"),
+    locationCode: z.number().int().positive(),
+    locationLabel: z.string().min(1),
+    languageCode: z.string().min(1),
+    completeness: z.enum(["complete", "partial", "unknown"]),
+  }),
+  z.object({
+    status: z.literal("NOT_RUN"),
+    organicTraffic: z.null(),
+    organicKeywords: z.null(),
+    fetchedAt: z.null(),
+    dataAsOf: z.null(),
+    provider: z.null(),
+    integration: z.null(),
+    sourceClass: z.null(),
+    locationCode: z.number().int().positive(),
+    locationLabel: z.string().min(1),
+    languageCode: z.string().min(1),
+    completeness: z.literal("unknown"),
+    reason: z.string().min(1),
+  }),
+]);
 
 export type SearchOverviewObservation = z.infer<
   typeof searchOverviewObservationSchema
@@ -87,8 +104,12 @@ function jsonResponse(body: unknown, status = 200, headers: HeadersInit = {}) {
   });
 }
 
-function parseRequestBody(rawBody: string) {
-  if (rawBody.length > MAX_REQUEST_BODY_CHARACTERS) {
+async function readBoundedRequestBody(request: Request) {
+  const contentLength = Number(request.headers.get("content-length"));
+  if (
+    Number.isFinite(contentLength) &&
+    contentLength > MAX_REQUEST_BODY_BYTES
+  ) {
     throw new PublicWidgetAuditError(
       413,
       "REQUEST_TOO_LARGE",
@@ -96,6 +117,45 @@ function parseRequestBody(rawBody: string) {
     );
   }
 
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const next = await reader.read();
+    if (next.done) break;
+    totalBytes += next.value.byteLength;
+    if (totalBytes > MAX_REQUEST_BODY_BYTES) {
+      await reader.cancel();
+      throw new PublicWidgetAuditError(
+        413,
+        "REQUEST_TOO_LARGE",
+        "The request body is too large.",
+      );
+    }
+    chunks.push(next.value);
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(body);
+  } catch {
+    throw new PublicWidgetAuditError(
+      400,
+      "VALIDATION_ERROR",
+      "Send a valid UTF-8 JSON request body.",
+    );
+  }
+}
+
+function parseRequestBody(rawBody: string) {
   let decoded: unknown;
   try {
     decoded = JSON.parse(rawBody);
@@ -154,10 +214,13 @@ function buildAuditResponse(
     layers: {
       search: {
         ...search,
-        reconciliationStatus: "UNRESOLVED",
+        reconciliationStatus:
+          search.status === "NOT_RUN" ? "UNAVAILABLE" : "UNRESOLVED",
         confidence: null,
         confidenceReason:
-          "A single estimated provider response is not corroborated evidence.",
+          search.status === "NOT_RUN"
+            ? "No search evidence was acquired."
+            : "A single estimated provider response is not corroborated evidence.",
       },
       website: unavailableLayer(
         "NOT_RUN",
@@ -192,6 +255,7 @@ function buildAuditResponse(
 
 function responseForError(error: unknown, onError?: (error: unknown) => void) {
   if (error instanceof PublicWidgetAuditError) {
+    if (error.status >= 500) onError?.(error);
     const headers: HeadersInit = {};
     if (error.retryAfterSeconds !== undefined) {
       headers["Retry-After"] = String(error.retryAfterSeconds);
@@ -245,7 +309,7 @@ export function createPublicWidgetAuditHandler(
     }
 
     try {
-      const input = parseRequestBody(await request.text());
+      const input = parseRequestBody(await readBoundedRequestBody(request));
       let domain: string;
       try {
         domain = dependencies.normalizeDomain(input.domain);

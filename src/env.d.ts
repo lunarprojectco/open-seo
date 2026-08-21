@@ -16,6 +16,9 @@ declare namespace Cloudflare {
     // edges, page mirror). Untyped here; getAuditScratchpad narrows the stub.
     AUDIT_SCRATCHPAD: DurableObjectNamespace;
 
+    // Global serialized rate/budget ledger for operator-sponsored widget calls.
+    PUBLIC_WIDGET_AUDIT_BUDGET: DurableObjectNamespace;
+
     AUTH_MODE?: "cloudflare_access" | "local_noauth" | "hosted";
     BYPASS_EMAIL_VERIFICATION?: string;
     TEAM_DOMAIN?: string;
