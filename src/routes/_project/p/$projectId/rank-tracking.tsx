@@ -1,7 +1,8 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_project/p/$projectId/rank-tracking")({
-  component: RankTrackingLayout,
+  component: withIntelligenceTabs(RankTrackingLayout),
 });
 
 function RankTrackingLayout() {

@@ -13,11 +13,11 @@ import { getSearchPerformanceReport } from "@/serverFunctions/searchPerformance"
 import {
   CardShell,
   EmptyCardBody,
+  MetricCard,
+  PercentDelta,
   formatDay,
   moreDetailsClass,
   newLost,
-  PercentDelta,
-  Stat,
 } from "@/client/features/dashboard/cardParts";
 import type {
   DashboardAuditSummary,
@@ -29,6 +29,13 @@ import type {
 const issueTitles: Record<string, string | undefined> = Object.fromEntries(
   Object.entries(AUDIT_ISSUE_TYPES).map(([key, value]) => [key, value.title]),
 );
+
+// Search Console numbers are as of the window's last day; Google publishes with a lag of about two days.
+const gscSource = (endDate: string) => ({
+  provider: "Google Search Console",
+  collectedAt: endDate,
+  limitation: "data lags about two days",
+});
 
 export function GscCard({
   projectId,
@@ -84,9 +91,10 @@ export function GscCard({
         </p>
       ) : report?.connected ? (
         <div className="grid grid-cols-2 gap-3">
-          <Stat
+          <MetricCard
             label="Clicks"
             value={formatCount(report.totals.clicks)}
+            source={gscSource(report.range.endDate)}
             sub={
               <PercentDelta
                 current={report.totals.clicks}
@@ -94,9 +102,10 @@ export function GscCard({
               />
             }
           />
-          <Stat
+          <MetricCard
             label="Impressions"
             value={formatCount(report.totals.impressions)}
+            source={gscSource(report.range.endDate)}
             sub={
               <PercentDelta
                 current={report.totals.impressions}
@@ -104,10 +113,15 @@ export function GscCard({
               />
             }
           />
-          <Stat label="CTR" value={formatCtr(report.totals.ctr)} />
-          <Stat
+          <MetricCard
+            label="CTR"
+            value={formatCtr(report.totals.ctr)}
+            source={gscSource(report.range.endDate)}
+          />
+          <MetricCard
             label="Avg position"
             value={formatPosition(report.totals.position)}
+            source={gscSource(report.range.endDate)}
           />
         </div>
       ) : null}
@@ -235,6 +249,13 @@ export function BacklinkPulseCard({
     );
   }
 
+  const backlinkSource = {
+    provider: "DataForSEO backlinks",
+    collectedAt: backlinks.capturedAt,
+    limitation: backlinks.stale
+      ? "snapshot is past its refresh window"
+      : undefined,
+  };
   return (
     <CardShell
       title="Backlink pulse"
@@ -253,23 +274,26 @@ export function BacklinkPulseCard({
       }
     >
       <div className="grid grid-cols-2 gap-3">
-        <Stat
+        <MetricCard
+          source={backlinkSource}
           label="Ref. domains"
           value={
             backlinks.referringDomains === null
-              ? "—"
+              ? null
               : backlinks.referringDomains.toLocaleString()
           }
         />
-        <Stat
+        <MetricCard
+          source={backlinkSource}
           label="Backlinks"
           value={
             backlinks.backlinks === null
-              ? "—"
+              ? null
               : backlinks.backlinks.toLocaleString()
           }
         />
-        <Stat
+        <MetricCard
+          source={backlinkSource}
           label="New links"
           value={`▲ ${newLost(backlinks.newBacklinks)}`}
           tone={
@@ -278,7 +302,8 @@ export function BacklinkPulseCard({
               : undefined
           }
         />
-        <Stat
+        <MetricCard
+          source={backlinkSource}
           label="Lost links"
           value={`▼ ${newLost(backlinks.lostBacklinks)}`}
           tone={

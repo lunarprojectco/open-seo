@@ -1,3 +1,4 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { BacklinksPage } from "@/client/features/backlinks/BacklinksPage";
 import {
@@ -8,7 +9,7 @@ import { defaultScopeForInput } from "@/shared/researchScope";
 
 export const Route = createFileRoute("/_project/p/$projectId/backlinks")({
   validateSearch: backlinksSearchSchema,
-  component: BacklinksRoute,
+  component: withIntelligenceTabs(BacklinksRoute),
 });
 
 function BacklinksRoute() {

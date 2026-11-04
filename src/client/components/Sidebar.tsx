@@ -49,29 +49,46 @@ function SidebarNavLink({
   label,
   onNavigate,
   linkProps,
+  alsoActiveFor = [],
 }: {
   icon: ComponentType<{ className?: string }>;
   label: string;
   onNavigate?: () => void;
   linkProps: LinkOptions;
+  // Paths that belong to this destination without sharing its prefix: the
+  // Intelligence views keep their own URLs, so the item lights up for them too.
+  alsoActiveFor?: string[];
 }) {
+  const { pathname } = useLocation();
+  const forcedActive = alsoActiveFor.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
   return (
     <Link
       onClick={onNavigate}
       activeOptions={{ exact: false, includeSearch: false }}
       {...linkProps}
-      className={navItemClass}
+      className={
+        forcedActive
+          ? `${navItemClass} ${navItemActiveProps.className}`
+          : navItemClass
+      }
       activeProps={navItemActiveProps}
     >
-      {({ isActive }: { isActive: boolean }) => (
-        <>
-          {isActive ? (
-            <div className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full bg-primary" />
-          ) : null}
-          <Icon className="h-4 w-4 shrink-0" />
-          <span className="truncate">{label}</span>
-        </>
-      )}
+      {({ isActive: linkActive }: { isActive: boolean }) =>
+        (() => {
+          const isActive = linkActive || forcedActive;
+          return (
+            <>
+              {isActive ? (
+                <div className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full bg-primary" />
+              ) : null}
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{label}</span>
+            </>
+          );
+        })()
+      }
     </Link>
   );
 }
@@ -178,7 +195,8 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
                 {group.label}
               </div>
               {group.items.map((item) => {
-                const { icon, label, ...linkProps } = item;
+                const { icon, label, alsoActiveFor, ...linkProps } =
+                  item as typeof item & { alsoActiveFor?: string[] };
                 return (
                   <SidebarNavLink
                     key={linkProps.to}
@@ -186,6 +204,7 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
                     label={label}
                     onNavigate={onNavigate}
                     linkProps={linkProps}
+                    alsoActiveFor={alsoActiveFor}
                   />
                 );
               })}

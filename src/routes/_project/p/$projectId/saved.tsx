@@ -1,3 +1,4 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   keepPreviousData,
@@ -42,7 +43,7 @@ import {
 import type { SavedKeywordTag } from "@/types/keywords";
 
 export const Route = createFileRoute("/_project/p/$projectId/saved")({
-  component: SavedKeywordsPage,
+  component: withIntelligenceTabs(SavedKeywordsPage),
 });
 
 const FILTER_DEBOUNCE_MS = 350;

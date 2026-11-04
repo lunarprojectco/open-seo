@@ -1,3 +1,4 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PromptExplorerPage } from "@/client/features/ai-search/PromptExplorerPage";
 import {
@@ -7,7 +8,7 @@ import {
 
 export const Route = createFileRoute("/_project/p/$projectId/prompt-explorer")({
   validateSearch: promptExplorerSearchSchema,
-  component: PromptExplorerRoute,
+  component: withIntelligenceTabs(PromptExplorerRoute),
 });
 
 function PromptExplorerRoute() {

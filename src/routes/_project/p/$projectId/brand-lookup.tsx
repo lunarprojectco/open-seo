@@ -1,10 +1,11 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { BrandLookupPage } from "@/client/features/ai-search/BrandLookupPage";
 import { brandLookupSearchSchema } from "@/types/schemas/ai-search";
 
 export const Route = createFileRoute("/_project/p/$projectId/brand-lookup")({
   validateSearch: brandLookupSearchSchema,
-  component: BrandLookupRoute,
+  component: withIntelligenceTabs(BrandLookupRoute),
 });
 
 function BrandLookupRoute() {

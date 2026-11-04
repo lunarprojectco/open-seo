@@ -1,3 +1,4 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { KeywordResearchPage } from "@/client/features/keywords/page/KeywordResearchPage";
 import {
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/_project/p/$projectId/keywords")({
       replace: true,
     });
   },
-  component: KeywordResearchPageRoute,
+  component: withIntelligenceTabs(KeywordResearchPageRoute),
 });
 
 function KeywordResearchPageRoute() {

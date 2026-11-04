@@ -1,3 +1,4 @@
+import { withIntelligenceTabs } from "@/client/features/intelligence/IntelligenceTabs";
 import {
   createFileRoute,
   stripSearchParams,
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/_project/p/$projectId/domain")({
   search: {
     middlewares: [stripSearchParams(DEFAULT_DOMAIN_SEARCH)],
   },
-  component: DomainOverviewRoute,
+  component: withIntelligenceTabs(DomainOverviewRoute),
 });
 
 function DomainOverviewRoute() {

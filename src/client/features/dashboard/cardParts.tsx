@@ -109,3 +109,105 @@ export function formatDay(timestamp: string): string {
     day: "numeric",
   });
 }
+
+// ---- Source and freshness contract -------------------------------------------------------
+// Every measured number on the dashboard says where it came from and when. A card never shows
+// a number without these, and a card with no data says so instead of showing a zero.
+
+export type MetricSource = {
+  /** Who measured it: "Google Search Console", "DataForSEO", "Site audit", "Rank tracker". */
+  provider: string;
+  /** When the provider's data was collected, ISO. Null means never. */
+  collectedAt: string | null;
+  /** Sample data is labelled; it is never a measurement. */
+  sample?: boolean;
+  /** The provider's own caveat, when it has one: "last 16 months", "top 1,000 rows". */
+  limitation?: string;
+};
+
+export function freshnessLabel(
+  collectedAt: string | null,
+  now = Date.now(),
+): string {
+  if (!collectedAt) return "never collected";
+  const at = new Date(
+    collectedAt.includes("T")
+      ? collectedAt
+      : `${collectedAt.replace(" ", "T")}Z`,
+  ).getTime();
+  if (Number.isNaN(at)) return "collected at an unknown time";
+  const hours = Math.max(0, Math.round((now - at) / 3_600_000));
+  if (hours < 1) return "collected in the last hour";
+  if (hours < 48) return `collected ${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  if (days <= 31) return `collected ${days} day${days === 1 ? "" : "s"} ago`;
+  return `collected on ${formatDay(collectedAt)}`;
+}
+
+/** Older than this, a measurement is shown as stale. */
+export const STALE_AFTER_HOURS = 72;
+
+export function isStale(collectedAt: string | null, now = Date.now()): boolean {
+  if (!collectedAt) return true;
+  const at = new Date(
+    collectedAt.includes("T")
+      ? collectedAt
+      : `${collectedAt.replace(" ", "T")}Z`,
+  ).getTime();
+  return Number.isNaN(at) || now - at > STALE_AFTER_HOURS * 3_600_000;
+}
+
+export function MetricCard({
+  label,
+  value,
+  source,
+  tone,
+  sub,
+  empty,
+}: {
+  label: string;
+  /** The measured value, or null when there is none. Null renders "No data", never 0. */
+  value: string | null;
+  source: MetricSource;
+  tone?: "success" | "error";
+  sub?: React.ReactNode;
+  /** What to say when there is no value: "Connect Search Console", "Run an audit". */
+  empty?: string;
+}) {
+  const stale = value !== null && !source.sample && isStale(source.collectedAt);
+  const toneClass =
+    tone === "success" ? "text-success" : tone === "error" ? "text-error" : "";
+  return (
+    <div
+      className="min-w-0"
+      data-metric={label}
+      data-sample={source.sample ? "true" : "false"}
+      data-stale={stale ? "true" : "false"}
+    >
+      <p className="text-xs uppercase tracking-wide text-base-content/60">
+        {label}
+      </p>
+      {value === null ? (
+        <p
+          className="text-base text-base-content/60"
+          aria-label={`${label}: no data`}
+        >
+          No data{empty ? ` · ${empty}` : ""}
+        </p>
+      ) : (
+        <p className={`text-2xl font-semibold tabular-nums ${toneClass}`}>
+          {value}
+        </p>
+      )}
+      {sub}
+      <p className="mt-1 text-[11px] text-base-content/50">
+        {source.provider}
+        {source.sample
+          ? " · sample data, not a measurement"
+          : ` · ${freshnessLabel(source.collectedAt)}`}
+        {stale ? " · stale" : ""}
+        {source.limitation ? ` · ${source.limitation}` : ""}
+      </p>
+    </div>
+  );
+}

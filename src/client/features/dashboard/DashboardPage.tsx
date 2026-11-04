@@ -15,6 +15,7 @@ import {
   GscCard,
 } from "@/client/features/dashboard/DashboardCards";
 import { Ga4Card } from "@/client/features/dashboard/Ga4Card";
+import { WhatChangedCard } from "@/client/features/dashboard/WhatChangedCard";
 import { McpConnectCard } from "@/client/features/dashboard/McpConnectCard";
 import { WorkspaceMergeBanner } from "@/client/features/dashboard/WorkspaceMergeBanner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
@@ -304,11 +305,18 @@ export function DashboardPage({ projectId }: { projectId: string }) {
   return (
     <div className="px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold">Overview</h1>
 
         <WorkspaceMergeBanner />
 
         <OnboardingChecklist projectId={projectId} activation={activation} />
+
+        <WhatChangedCard
+          projectId={projectId}
+          gscConnected={gscConnected}
+          rank={overview?.rank ?? null}
+          audit={overview?.audit ?? null}
+        />
 
         {/* Every card is half width on large screens (only the checklist spans).
           Cards with data render before setup pitches and empty states. */}
