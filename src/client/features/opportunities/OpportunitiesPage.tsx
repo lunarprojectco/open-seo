@@ -139,8 +139,8 @@ export function OpportunitiesPage({ projectId }: { projectId: string }) {
             ))}
           </ul>
           <p className="mt-4 text-[11px] text-base-content/50">
-            Derived {freshnessLabel(query.data.computedAt)} from the sources
-            named on each item.
+            Derived from the sources named on each item; each item carries its
+            own collection time.
           </p>
         </>
       )}

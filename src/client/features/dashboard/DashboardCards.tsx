@@ -9,6 +9,7 @@ import {
   formatCtr,
   formatPosition,
 } from "@/client/features/search-performance/SearchPerformanceColumns";
+import { getSeoApiKeyStatus } from "@/serverFunctions/config";
 import { getSearchPerformanceReport } from "@/serverFunctions/searchPerformance";
 import {
   CardShell,
@@ -249,12 +250,19 @@ export function BacklinkPulseCard({
     );
   }
 
+  // Same query the app shell uses for its banner; the cache answers it once.
+  const sample = useQuery({
+    queryKey: ["seoApiKeyStatus"],
+    queryFn: () => getSeoApiKeyStatus(),
+  }).data?.sample;
   const backlinkSource = {
-    provider: "DataForSEO backlinks",
+    provider: sample ? "DataForSEO backlinks, sample" : "DataForSEO backlinks",
     collectedAt: backlinks.capturedAt,
-    limitation: backlinks.stale
-      ? "snapshot is past its refresh window"
-      : undefined,
+    limitation: sample
+      ? "sample numbers: DataForSEO is not connected"
+      : backlinks.stale
+        ? "snapshot is past its refresh window"
+        : undefined,
   };
   return (
     <CardShell
