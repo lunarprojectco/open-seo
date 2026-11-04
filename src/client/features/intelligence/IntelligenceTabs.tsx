@@ -37,9 +37,7 @@ export function withIntelligenceTabs(
   View: ComponentType,
 ): () => React.JSX.Element {
   function IntelligenceView() {
-    const { projectId } = useParams({ strict: false }) as {
-      projectId?: string;
-    };
+    const { projectId } = useParams({ strict: false });
     return (
       <>
         {projectId ? (

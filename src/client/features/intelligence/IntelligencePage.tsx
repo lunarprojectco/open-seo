@@ -29,19 +29,19 @@ export function IntelligencePage({ projectId }: { projectId: string }) {
       void navigate({
         to: "/p/$projectId/domain",
         params: { projectId },
-        search: { domain: intent.value } as never,
+        search: { domain: intent.value },
       });
     else if (intent.kind === "url")
       void navigate({
         to: "/p/$projectId/content-score",
         params: { projectId },
-        search: { url: intent.value } as never,
+        search: { url: intent.value },
       });
     else
       void navigate({
         to: "/p/$projectId/keywords",
         params: { projectId },
-        search: { q: intent.value } as never,
+        search: { q: intent.value },
       });
   };
   const hint =

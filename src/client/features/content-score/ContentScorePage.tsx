@@ -38,14 +38,20 @@ function useLiveScore(
   return keyword.trim().length < 2 || !input.body.trim() ? null : score;
 }
 
-export function ContentScorePage({ projectId }: { projectId: string }) {
+export function ContentScorePage({
+  projectId,
+  initialUrl,
+}: {
+  projectId: string;
+  initialUrl?: string;
+}) {
   const [keyword, setKeyword] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [meta, setMeta] = React.useState("");
   const [slug, setSlug] = React.useState("");
   const [body, setBody] = React.useState("");
   const [site, setSite] = React.useState("");
-  const [urls, setUrls] = React.useState("");
+  const [urls, setUrls] = React.useState(initialUrl ?? "");
   const [reference, setReference] = React.useState<ContentReference | null>(null);
   const score = useLiveScore({ title, meta, slug, body }, keyword, reference, site);
 

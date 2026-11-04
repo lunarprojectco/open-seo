@@ -54,11 +54,11 @@ describe("opportunities are derived from evidence, never scored", () => {
       expect(o.evidence.length).toBeGreaterThan(0);
       expect(o.action).toMatch(/\.$/);
     }
-    expect(list[0]!.source.limitation).toBe("42 pages crawled");
+    expect(list[0].source.limitation).toBe("42 pages crawled");
     expect(
-      list[1]!.evidence.find((e) => e.label === "Impressions")!.value,
+      list[1].evidence.find((e) => e.label === "Impressions")!.value,
     ).toBe("180");
-    expect(list[4]!.title).toBe("Some new check");
+    expect(list[4].title).toBe("Some new check");
   });
 
   it("is deterministic: the same inputs give the same list twice", () => {

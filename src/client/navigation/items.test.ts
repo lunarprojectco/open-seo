@@ -12,7 +12,7 @@ describe("project navigation", () => {
   it("offers five destinations for a project, plus Connect", () => {
     const groups = getProjectNavGroups("p1");
     expect(groups).toHaveLength(1);
-    expect(groups[0]!.items.map((i) => i.label)).toEqual([
+    expect(groups[0].items.map((i) => i.label)).toEqual([
       "Overview",
       "Intelligence",
       "Opportunities",
@@ -23,10 +23,9 @@ describe("project navigation", () => {
   });
 
   it("lights Intelligence up on every research view, each of which keeps its own URL", () => {
-    const intelligence = getProjectNavGroups("p1")[0]!.items[1] as {
-      alsoActiveFor?: string[];
-    };
-    expect(intelligence.alsoActiveFor).toEqual(intelligenceViewPaths("p1"));
+    expect(getProjectNavGroups("p1")[0].items[1]).toMatchObject({
+      alsoActiveFor: intelligenceViewPaths("p1"),
+    });
     expect(intelligenceViewPaths("p1")).toContain("/p/p1/keywords");
     expect(INTELLIGENCE_VIEWS).toHaveLength(9);
     for (const view of INTELLIGENCE_VIEWS) {
