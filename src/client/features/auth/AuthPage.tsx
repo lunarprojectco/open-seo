@@ -113,6 +113,7 @@ export function AuthPageCard({
     <div className="w-full max-w-xs space-y-6">
       <div className="text-center space-y-3">
         <div
+          role="img"
           aria-label="Lunar Optimize"
           className="mx-auto flex size-10 items-center justify-center rounded-full border border-primary text-2xl text-primary"
         >
