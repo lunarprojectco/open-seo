@@ -336,7 +336,7 @@
 }
 .lo-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   margin-top: 35px;
 }
@@ -532,5 +532,135 @@
   }
   .lo-footer {
     flex-direction: column;
+  }
+}
+
+/* 2026-11-15 rebuild: tabbed preview, reassurance row, two places, loop, FAQ. */
+.lo-tabs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.lo-tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lo-tablist button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #10252a;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lo-tablist button[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #08171c;
+}
+.lo-tablist button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.lo-preview-top .lo-example {
+  margin-left: auto;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  border: 1px solid #4b6a6c;
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: #c4d2d2;
+}
+.lo-reassure {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.lo-reassure li::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.lo-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.lo-loop {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  counter-reset: loop;
+}
+.lo-loop li {
+  counter-increment: loop;
+  flex: 1 1 140px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.lo-loop li::before {
+  content: "0" counter(loop);
+  display: block;
+  color: var(--accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  margin-bottom: 8px;
+}
+.lo-faq {
+  display: grid;
+  gap: 8px;
+  max-width: 860px;
+}
+.lo-faq details {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 20px;
+  background: #0d2126;
+}
+.lo-faq summary {
+  cursor: pointer;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  font-weight: 650;
+}
+.lo-faq summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.lo-faq p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0 0 18px;
+}
+.lo-actions-center {
+  justify-content: center;
+}
+@media (max-width: 850px) {
+  .lo-two {
+    grid-template-columns: 1fr;
   }
 }

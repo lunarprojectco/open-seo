@@ -1,9 +1,11 @@
+import { useState } from "react";
 import {
   ArrowRight,
   BarChart3,
   Bot,
-  CheckCircle2,
+  FileText,
   Globe2,
+  Lightbulb,
   Link2,
   ScanSearch,
   Search,
@@ -13,6 +15,16 @@ import {
   LUNAR_MONTHLY_PRICE_USD,
   LUNAR_MONTHLY_USAGE_CREDIT_USD,
 } from "@/shared/billing";
+
+/*
+ * The public face of Lunar Optimize (owner, 2026-11-15: in the spirit of a
+ * well-known SEO tool's home page: the two places to win, a tabbed product
+ * preview, feature chapters, a loop and an FAQ). Structure only; no other
+ * product's words or data. Every preview is labelled as example data, and
+ * sign-up is by invitation while billing is set up, so the page says so.
+ */
+
+const SUPPORT_URL = "https://mission-control.projectlunar.ai/support";
 
 const capabilities = [
   {
@@ -50,19 +62,155 @@ const capabilities = [
       "Explore supported answer surfaces and keep observations distinct from estimates.",
     icon: Bot,
   },
+  {
+    title: "Content score",
+    description:
+      "Score a page's copy in your browser, without spending data credits.",
+    icon: FileText,
+  },
+  {
+    title: "Opportunities",
+    description:
+      "Next steps drawn from your audit issues and Search Console, never from guesses.",
+    icon: Lightbulb,
+  },
 ] as const;
+
+type Row = { label: string; value: string };
+const previews: { id: string; tab: string; title: string; rows: Row[] }[] = [
+  {
+    id: "audit",
+    tab: "Audit",
+    title: "Site audit",
+    rows: [
+      { label: "Pages crawled", value: "148" },
+      { label: "Issues to fix", value: "23" },
+      { label: "Slowest page", value: "3.4 s" },
+      { label: "Next action", value: "Add missing titles (9 pages)" },
+    ],
+  },
+  {
+    id: "keywords",
+    tab: "Keywords",
+    title: "Keyword research",
+    rows: [
+      { label: "furnace repair near me", value: "2,400 / month" },
+      { label: "furnace tune-up cost", value: "880 / month" },
+      { label: "Related questions", value: "14" },
+      { label: "Source and date", value: "Shown on every row" },
+    ],
+  },
+  {
+    id: "tracking",
+    tab: "Tracking",
+    title: "Rank tracking",
+    rows: [
+      { label: "Tracked keywords", value: "40" },
+      { label: "In the top 10", value: "12" },
+      { label: "Moved up this week", value: "5" },
+      { label: "Location and language", value: "Per project" },
+    ],
+  },
+  {
+    id: "ai",
+    tab: "AI visibility",
+    title: "AI answers",
+    rows: [
+      { label: "Questions checked", value: "20" },
+      { label: "Answers naming your brand", value: "6" },
+      { label: "Observed or estimated", value: "Always labelled" },
+      { label: "Surfaces", value: "Supported ones only" },
+    ],
+  },
+];
+
+const faq = [
+  {
+    q: "Is the data real?",
+    a: "Yes, when a data provider is connected for the feature. When it is not, or a provider runs out of credit, every screen that uses it says Sample data, so you never mistake an example for a measurement.",
+  },
+  {
+    q: "Can I sign up today?",
+    a: "Sign-up is by invitation while billing is set up. Ask for one through the Project Lunar support page.",
+  },
+  {
+    q: "What does it cost?",
+    a: `One plan, $${LUNAR_MONTHLY_PRICE_USD} a month, including $${LUNAR_MONTHLY_USAGE_CREDIT_USD.toFixed(2)} of metered data credits. Enrollment opens once billing setup is complete.`,
+  },
+  {
+    q: "Does it cover AI answers as well as search?",
+    a: "Yes. AI visibility looks at supported answer surfaces and keeps what it observed apart from what it estimated.",
+  },
+];
 
 export const landingHead = () => ({
   meta: [
-    { title: "Lunar Optimize | Search intelligence for the work ahead" },
+    {
+      title:
+        "Lunar Optimize | Be found in search and in AI answers",
+    },
     {
       name: "description",
       content:
-        "Lunar Optimize brings keyword research, rank tracking, competitor research, backlinks, site audits, and AI visibility into one Project Lunar workspace.",
+        "Audit your site, research keywords and competitors, track rankings and see where AI answers mention you, in one Project Lunar workspace that shows where every number comes from.",
     },
   ],
   links: [{ rel: "stylesheet", href: landingCss }],
 });
+
+function Preview() {
+  const [active, setActive] = useState(0);
+  const preview = previews[active]!;
+  return (
+    <div className="lo-tabs">
+      <div className="lo-tablist" role="tablist" aria-label="Product preview">
+        {previews.map((p, i) => (
+          <button
+            key={p.id}
+            type="button"
+            role="tab"
+            id={`lo-tab-${p.id}`}
+            aria-selected={i === active}
+            aria-controls="lo-tabpanel"
+            tabIndex={i === active ? 0 : -1}
+            onClick={() => setActive(i)}
+            onKeyDown={(e) => {
+              const step =
+                e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+              if (!step) return;
+              e.preventDefault();
+              const next = (active + step + previews.length) % previews.length;
+              setActive(next);
+              document.getElementById(`lo-tab-${previews[next]!.id}`)?.focus();
+            }}
+          >
+            {p.tab}
+          </button>
+        ))}
+      </div>
+      <div
+        className="lo-preview"
+        role="tabpanel"
+        id="lo-tabpanel"
+        aria-labelledby={`lo-tab-${preview.id}`}
+      >
+        <div className="lo-preview-top">
+          <span className="lo-preview-dot" /> {preview.title.toUpperCase()}{" "}
+          <span className="lo-example">Example data</span>
+        </div>
+        <div className="lo-preview-body">
+          {preview.rows.map((r) => (
+            <div className="lo-preview-row" key={r.label}>
+              <span>{r.label}</span>
+              <span>{r.value}</span>
+            </div>
+          ))}
+        </div>
+        <p>Example data, not your site. Your workspace shows real figures with their source and date.</p>
+      </div>
+    </div>
+  );
+}
 
 export function WelcomePage() {
   return (
@@ -85,8 +233,8 @@ export function WelcomePage() {
           </span>
         </a>
         <nav aria-label="Primary navigation">
-          <a href="#capabilities">Capabilities</a>
-          <a href="#how-it-works">How it works</a>
+          <a href="#capabilities">Features</a>
+          <a href="#faq">Questions</a>
           <a className="lo-header-signin" href="/sign-in">
             Sign in
           </a>
@@ -105,77 +253,58 @@ export function WelcomePage() {
             <span /> PROJECT LUNAR · SEARCH INTELLIGENCE
           </p>
           <h1 id="hero-title">
-            Know what to improve.
+            Be found in search.
             <br />
-            <span>See what the data supports.</span>
+            <span>And in AI answers.</span>
           </h1>
           <p className="lo-hero-copy">
-            Research a market, track your search presence, and turn site
-            findings into a clear next step. Lunar Optimize keeps the source and
-            freshness of each observation close to the decision it informs.
+            Audit your site, research keywords and competitors, track your
+            rankings and see where AI answers mention you. Every number shows
+            where it came from and when.
           </p>
           <div className="lo-actions">
-            <a
-              className="lo-button lo-button-primary"
-              href="/sign-up?redirect=%2F"
-            >
-              Create your workspace <ArrowRight size={17} aria-hidden="true" />
+            <a className="lo-button lo-button-primary" href="/sign-in">
+              Sign in <ArrowRight size={17} aria-hidden="true" />
             </a>
-            <a className="lo-button lo-button-secondary" href="#capabilities">
-              Explore the platform
+            <a className="lo-button lo-button-secondary" href={SUPPORT_URL}>
+              Ask for an invitation
             </a>
           </div>
-          <p className="lo-hero-note">
-            Provider data and usage credits vary by feature. Subscription terms
-            appear before checkout.
+          <ul className="lo-reassure" aria-label="Good to know">
+            <li>Sign-up is by invitation while billing is set up</li>
+            <li>Examples are always labelled</li>
+            <li>Source and date on every figure</li>
+          </ul>
+        </div>
+        <Preview />
+      </section>
+
+      <section className="lo-section" aria-labelledby="two-title">
+        <div className="lo-section-heading">
+          <p className="lo-kicker">ONE QUESTION, TWO PLACES</p>
+          <h2 id="two-title">People ask search engines and AI assistants</h2>
+          <p>
+            The same question now has two places to answer it. Lunar Optimize
+            looks at both.
           </p>
         </div>
-        <div
-          className="lo-preview"
-          aria-label="Illustration of an evidence-led SEO workspace"
-        >
-          <div className="lo-preview-top">
-            <span className="lo-preview-dot" /> PROJECT OVERVIEW <span>↗</span>
-          </div>
-          <div className="lo-preview-body">
-            <div className="lo-preview-heading">
-              <span>Search landscape</span>
-              <span>DATA SOURCE · DATE</span>
-            </div>
-            <div className="lo-preview-bars" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-            </div>
-            <div className="lo-preview-row">
-              <span>
-                <CheckCircle2 size={15} /> Observed signals
-              </span>
-              <span>Review source</span>
-            </div>
-            <div className="lo-preview-row">
-              <span>
-                <ScanSearch size={15} /> Site issues
-              </span>
-              <span>Prioritize fixes</span>
-            </div>
-            <div className="lo-preview-row">
-              <span>
-                <BarChart3 size={15} /> Tracked keywords
-              </span>
-              <span>Watch changes</span>
-            </div>
-          </div>
-          <p>Illustrative interface · no sample rankings or traffic claims</p>
+        <div className="lo-two">
+          <article className="lo-card">
+            <Search size={22} strokeWidth={1.8} aria-hidden="true" />
+            <h3>Search results</h3>
+            <p>
+              Keywords, rankings, competitors, backlinks and the technical
+              health of your pages.
+            </p>
+          </article>
+          <article className="lo-card">
+            <Bot size={22} strokeWidth={1.8} aria-hidden="true" />
+            <h3>AI answers</h3>
+            <p>
+              Which supported answer surfaces mention you, kept apart from
+              estimates.
+            </p>
+          </article>
         </div>
       </section>
 
@@ -203,6 +332,20 @@ export function WelcomePage() {
         </div>
       </section>
 
+      <section className="lo-section" aria-labelledby="loop-title">
+        <div className="lo-section-heading">
+          <p className="lo-kicker">THE LOOP</p>
+          <h2 id="loop-title">Audit, fix, write, track. Then again.</h2>
+        </div>
+        <ol className="lo-loop">
+          <li>Audit</li>
+          <li>Fix</li>
+          <li>Write</li>
+          <li>Track</li>
+          <li>Repeat</li>
+        </ol>
+      </section>
+
       <section
         className="lo-section lo-process"
         id="how-it-works"
@@ -210,7 +353,7 @@ export function WelcomePage() {
       >
         <div className="lo-section-heading">
           <p className="lo-kicker">A CLEAR START</p>
-          <h2 id="process-title">Build a picture you can trust</h2>
+          <h2 id="process-title">Three steps to a picture you can trust</h2>
         </div>
         <ol>
           <li>
@@ -273,14 +416,34 @@ export function WelcomePage() {
         </div>
       </section>
 
+      <section className="lo-section" id="faq" aria-labelledby="faq-title">
+        <div className="lo-section-heading">
+          <p className="lo-kicker">QUESTIONS</p>
+          <h2 id="faq-title">Before you start</h2>
+        </div>
+        <div className="lo-faq">
+          {faq.map((f) => (
+            <details key={f.q}>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <section className="lo-final" aria-labelledby="final-title">
         <p className="lo-kicker">START WITH CLARITY</p>
         <h2 id="final-title">
           Your next search opportunity starts with better evidence.
         </h2>
-        <a className="lo-button lo-button-primary" href="/sign-up?redirect=%2F">
-          Create your workspace <ArrowRight size={17} aria-hidden="true" />
-        </a>
+        <div className="lo-actions lo-actions-center">
+          <a className="lo-button lo-button-primary" href="/sign-in">
+            Sign in <ArrowRight size={17} aria-hidden="true" />
+          </a>
+          <a className="lo-button lo-button-secondary" href={SUPPORT_URL}>
+            Ask for an invitation
+          </a>
+        </div>
       </section>
       <footer className="lo-footer">
         <span>
