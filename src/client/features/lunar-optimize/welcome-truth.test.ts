@@ -22,6 +22,18 @@ describe("Lunar Optimize welcome page", () => {
     expect(src).toContain("Sign-up is by invitation while billing is set up");
     expect(src).toContain('href="/sign-in"');
   });
+
+  it("claims source and date only where the screens show them", () => {
+    // Keyword research and domain overview rows carry no source or date; dashboard and opportunity cards do.
+    expect(visible).not.toMatch(/every figure|every number|every row/i);
+    expect(visible).toContain("Source and date on dashboard and opportunity cards");
+  });
+
+  it("promises no related-questions count and no per-screen sample label", () => {
+    // Keyword research modes are related, suggestions and ideas; the Sample data notice is one shell banner.
+    expect(visible).not.toContain("Related questions");
+    expect(visible).not.toContain("every screen that uses it says Sample data");
+  });
 });
 
 describe("Lunar Optimize welcome page scrolling", () => {

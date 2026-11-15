@@ -96,8 +96,8 @@ const previews: { id: string; tab: string; title: string; rows: Row[] }[] = [
     rows: [
       { label: "furnace repair near me", value: "2,400 / month" },
       { label: "furnace tune-up cost", value: "880 / month" },
-      { label: "Related questions", value: "14" },
-      { label: "Source and date", value: "Shown on every row" },
+      { label: "Related keywords", value: "14" },
+      { label: "Columns", value: "Volume, CPC, intent" },
     ],
   },
   {
@@ -127,7 +127,7 @@ const previews: { id: string; tab: string; title: string; rows: Row[] }[] = [
 const faq = [
   {
     q: "Is the data real?",
-    a: "Yes, when a data provider is connected for the feature. When it is not, or a provider runs out of credit, every screen that uses it says Sample data, so you never mistake an example for a measurement.",
+    a: "Yes, when the data provider is connected and answering. When the keyword data provider is not connected, the workspace shows a Sample data notice.",
   },
   {
     q: "Can I sign up today?",
@@ -152,7 +152,7 @@ export const landingHead = () => ({
     {
       name: "description",
       content:
-        "Audit your site, research keywords and competitors, track rankings and see where AI answers mention you, in one Project Lunar workspace that shows where every number comes from.",
+        "Audit your site, research keywords and competitors, track rankings and see where AI answers mention you, in one Project Lunar workspace.",
     },
   ],
   links: [{ rel: "stylesheet", href: landingCss }],
@@ -206,7 +206,7 @@ function Preview() {
             </div>
           ))}
         </div>
-        <p>Example data, not your site. Your workspace shows real figures with their source and date.</p>
+        <p>Example data, not your site.</p>
       </div>
     </div>
   );
@@ -259,8 +259,7 @@ export function WelcomePage() {
           </h1>
           <p className="lo-hero-copy">
             Audit your site, research keywords and competitors, track your
-            rankings and see where AI answers mention you. Every number shows
-            where it came from and when.
+            rankings and see where AI answers mention you.
           </p>
           <div className="lo-actions">
             <a className="lo-button lo-button-primary" href="/sign-in">
@@ -272,8 +271,8 @@ export function WelcomePage() {
           </div>
           <ul className="lo-reassure" aria-label="Good to know">
             <li>Sign-up is by invitation while billing is set up</li>
-            <li>Examples are always labelled</li>
-            <li>Source and date on every figure</li>
+            <li>The previews on this page are example data</li>
+            <li>Source and date on dashboard and opportunity cards</li>
           </ul>
         </div>
         <Preview />
