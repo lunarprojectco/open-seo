@@ -3,11 +3,15 @@
   --muted: #a8b9bf;
   --line: #30444a;
   --accent: #bcf46e;
-  min-height: 100vh;
+  /* The app locks html and body (app.css: overflow hidden, for the signed-in shell), so the public page
+     scrolls inside itself; before 2026-11-15 it could not be scrolled with a wheel or a finger. */
+  height: 100vh;
+  height: 100dvh;
   background: #08171c;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .lo-page * {
   box-sizing: border-box;
@@ -569,7 +573,7 @@
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
-.lo-preview-top .lo-example {
+.lo-preview-top span.lo-example {
   margin-left: auto;
   font-size: 0.62rem;
   letter-spacing: 0.1em;

@@ -23,3 +23,12 @@ describe("Lunar Optimize welcome page", () => {
     expect(src).toContain('href="/sign-in"');
   });
 });
+
+describe("Lunar Optimize welcome page scrolling", () => {
+  it("scrolls inside itself, because the app locks html and body", () => {
+    const css = readFileSync("src/client/styles/lunar-optimize.css", "utf8");
+    const page = /\.lo-page \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(page).toMatch(/overflow-y: auto/);
+    expect(page).not.toMatch(/overflow: hidden/);
+  });
+});
