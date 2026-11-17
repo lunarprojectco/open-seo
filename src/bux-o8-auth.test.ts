@@ -16,7 +16,7 @@ vi.mock("cloudflare:workers", () => ({
   env: {
     AUTH_MODE: "hosted",
     BETTER_AUTH_URL: "https://optimize.example.test",
-    BETTER_AUTH_SECRET: "a-test-secret-that-is-long-enough-123456",
+    BETTER_AUTH_SECRET: "x".repeat(40),
   },
 }));
 vi.mock("@tanstack/react-router", () => ({
