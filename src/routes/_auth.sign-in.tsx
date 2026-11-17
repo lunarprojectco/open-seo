@@ -127,8 +127,8 @@ function SignInPage() {
           <div
             className={
               showEmailForm
-                ? "flex justify-between text-sm text-base-content/50"
-                : "text-sm text-base-content/50"
+                ? "flex justify-between text-sm text-base-content/70"
+                : "text-sm text-base-content/70"
             }
           >
             {showEmailForm ? (

@@ -32,3 +32,15 @@ describe("sign-in page accessibility", () => {
     for (const element of errors) expect(element).toContain('role="alert"');
   });
 });
+
+describe("auth page footers and the verify-email error (batch 8 live check)", () => {
+  it("draws footer links at 70% ink, not 50% (3.38:1 on the auth card, under 4.5:1)", () => {
+    for (const f of ["src/routes/_auth.sign-in.tsx", "src/routes/_auth.sign-up.tsx", "src/routes/forgot-password.tsx", "src/routes/reset-password.tsx", "src/routes/verify-email.tsx"]) {
+      expect(readFileSync(f, "utf8")).not.toMatch(/text-base-content\/50/);
+    }
+  });
+
+  it("says the verify-email reason once, in the alert, not again in the header", () => {
+    expect(readFileSync("src/routes/verify-email.tsx", "utf8")).not.toMatch(/helperText: errorMessage/);
+  });
+});

@@ -90,7 +90,7 @@ function ForgotPasswordPage() {
                   <Link
                     to="/sign-in"
                     search={getSignInSearch(redirectTo)}
-                    className="text-base-content/50 hover:text-base-content transition-colors"
+                    className="text-base-content/70 hover:text-base-content transition-colors"
                   >
                     Back to sign in
                   </Link>

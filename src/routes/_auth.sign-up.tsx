@@ -195,7 +195,7 @@ function SignUpPage() {
                 paid enrollment.
               </p>
 
-              <p className="text-sm text-base-content/50">
+              <p className="text-sm text-base-content/70">
                 Already have an account?{" "}
                 <Link
                   to="/sign-in"

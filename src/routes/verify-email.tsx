@@ -77,7 +77,7 @@ function getVerifyEmailPageCopy({
   if (errorMessage) {
     return {
       title: "We couldn't confirm your email",
-      helperText: errorMessage,
+      helperText: "The reason and what to do next are below.",
     };
   }
 
@@ -222,7 +222,7 @@ function VerifyEmailPage() {
             <Link
               to="/sign-in"
               search={getSignInSearch(redirectTo)}
-              className="text-base-content/50 hover:text-base-content transition-colors"
+              className="text-base-content/70 hover:text-base-content transition-colors"
             >
               Back to sign in
             </Link>
