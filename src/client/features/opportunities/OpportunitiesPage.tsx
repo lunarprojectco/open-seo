@@ -113,7 +113,7 @@ export function OpportunitiesPage({ projectId }: { projectId: string }) {
           ))}
         </div>
       ) : query.isError ? (
-        <p className="mt-6 text-sm text-error">
+        <p role="alert" className="mt-6 text-sm text-error">
           Couldn’t load opportunities.{" "}
           <button
             type="button"

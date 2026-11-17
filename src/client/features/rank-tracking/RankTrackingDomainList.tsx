@@ -18,6 +18,7 @@ import {
 import { devicesLabel, scheduleLabel } from "@/shared/rank-tracking";
 import { formatLocationLabel } from "@/shared/keyword-locations";
 import { Modal } from "@/client/components/Modal";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
   applyDomainListFilters,
   countActiveDomainListFilters,
@@ -80,6 +81,10 @@ export function RankTrackingDomainList({
       });
       toast.success("Domain archived");
     },
+    onError: (error) =>
+      toast.error(
+        getStandardErrorMessage(error, "Couldn't archive the domain. Try again."),
+      ),
   });
 
   return (

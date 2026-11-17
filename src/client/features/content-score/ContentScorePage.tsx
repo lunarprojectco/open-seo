@@ -138,7 +138,7 @@ export function ContentScorePage({
                   </button>
                 )}
               </div>
-              {referenceMutation.isError && <p className="mt-2 text-sm text-error">The pages could not be measured.</p>}
+              {referenceMutation.isError && <p role="alert" className="mt-2 text-sm text-error">The pages could not be measured.</p>}
               {failed.length > 0 && (
                 <ul className="mt-2 text-xs text-base-content/70">
                   {failed.map((a) => <li key={a.url}>{a.url}: {a.error}</li>)}

@@ -11,6 +11,7 @@ import {
   createDataforseoClient,
   normalizeBacklinksTarget,
 } from "@/server/lib/dataforseo";
+import { dataforseoSampleReason } from "@/server/lib/dataforseo/sample";
 
 // Daily cadence: fresh numbers each visit without per-visit spend; a dormant
 // project costs nothing because refreshes are visit-triggered.
@@ -253,6 +254,10 @@ async function ensureBacklinkSnapshot(input: {
       target: normalized.apiTarget,
       includeSubdomains: normalized.includeSubdomains,
     });
+    // Sample data is never stored, so it cannot later show as collected.
+    if (dataforseoSampleReason() !== null) {
+      return getBacklinkSummary(projectId, domain);
+    }
     await BacklinkSnapshotRepository.insert({
       projectId,
       domain,

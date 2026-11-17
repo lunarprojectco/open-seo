@@ -83,6 +83,7 @@ function OnboardingFlow({
   const navigate = useNavigate();
   const { step } = Route.useSearch();
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers);
+  const [finishError, setFinishError] = useState<string | null>(null);
 
   const saveMutation = useMutation({
     mutationFn: (extra: { completed?: boolean }) =>
@@ -115,13 +116,17 @@ function OnboardingFlow({
   };
 
   const handleFinish = async () => {
+    setFinishError(null);
     try {
       await saveMutation.mutateAsync({ completed: true });
       // Refresh the shared cache so the destination's onboarding-redirect guard
       // sees the completed state and doesn't bounce the user back here.
       await queryClient.invalidateQueries({ queryKey: ["onboardingAnswers"] });
     } catch {
-      // Already logged by the mutation's onError; still navigate the user on.
+      // Stay on the step: navigating on would bounce back to step 1, because
+      // onboarding is still incomplete on the server.
+      setFinishError("Could not save your answers. Press Finish to try again.");
+      return;
     }
     captureClientEvent("onboarding:completed", {
       interests: answers.selectedInterests,
@@ -149,6 +154,7 @@ function OnboardingFlow({
       onSkip={handleSkip}
       onFinish={handleFinish}
       isSaving={saveMutation.isPending}
+      finishError={finishError}
       accountMenu={<OnboardingAccountMenu email={email} />}
     />
   );

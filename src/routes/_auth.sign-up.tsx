@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   AuthPageCard,
   AuthMethodChooser,
+  SignUpInvitationNotice,
   authRedirectSearchSchema,
   useAuthPageState,
 } from "@/client/features/auth/AuthPage";
@@ -209,6 +210,7 @@ function SignUpPage() {
         ) : null
       }
     >
+      <SignUpInvitationNotice />
       {!showEmailForm ? (
         <>
           <AuthMethodChooser
@@ -224,7 +226,9 @@ function SignUpPage() {
             }}
           />
           {google.error ? (
-            <p className="text-sm text-error">{google.error}</p>
+            <p className="text-sm text-error" role="alert">
+              {google.error}
+            </p>
           ) : null}
         </>
       ) : (
@@ -251,7 +255,9 @@ function SignUpPage() {
                     disabled={!isHostedMode}
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -275,7 +281,9 @@ function SignUpPage() {
                     required
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -301,7 +309,9 @@ function SignUpPage() {
                     maxLength={HOSTED_PASSWORD_MAX_LENGTH}
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -327,7 +337,9 @@ function SignUpPage() {
                     maxLength={HOSTED_PASSWORD_MAX_LENGTH}
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -352,7 +364,9 @@ function SignUpPage() {
               return (
                 <>
                   {errorMessage ? (
-                    <p className="text-sm text-error">{errorMessage}</p>
+                    <p className="text-sm text-error" role="alert">
+                      {errorMessage}
+                    </p>
                   ) : null}
                   <button
                     className="btn btn-soft w-full"

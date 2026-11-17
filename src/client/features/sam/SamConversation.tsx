@@ -2,7 +2,7 @@ import { useAgent } from "agents/react";
 // Think speaks the same chat protocol as @cloudflare/ai-chat, but its hook
 // variant skips the client->server transcript sync Think doesn't support.
 import { useAgentChat } from "@cloudflare/think/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatComposer } from "@/client/features/onboarding/OnboardingChatParts";
 import { invalidateSamSessions } from "@/client/features/sam/samQueries";
 import {
@@ -30,8 +30,9 @@ export function SamConversation({
   // session id. The WebSocket is authorized in the Worker (src/server.ts) before
   // it reaches the DO; billing gates come back as normal assistant messages.
   const agent = useAgent({ agent: "sam-chat", name: sessionId });
-  const { messages, sendMessage, setMessages, clearHistory, status } =
+  const { messages, sendMessage, setMessages, clearHistory, status, stop } =
     useAgentChat({ agent });
+  const [stopNotice, setStopNotice] = useState("");
 
   const isBusy = status === "submitted" || status === "streaming";
   const { scrollRef, onScroll, pinToBottom } = useStickToBottom(
@@ -39,6 +40,7 @@ export function SamConversation({
     status,
   );
   const sendText = (text: string) => {
+    setStopNotice("");
     pinToBottom();
     void sendMessage({ text });
   };
@@ -63,6 +65,16 @@ export function SamConversation({
   };
 
   const undoFrom = (messageId: string) => void rewindTo(messageId);
+
+  // Stop uses the chat hook's own stop, which sends the server a cancel for the
+  // running turn and keeps every message. A tool call already in flight can
+  // still finish server-side, and spend so far is still metered.
+  const stopTurn = () => {
+    void stop();
+    setStopNotice(
+      "SAM stopped. Your message is kept. A step that was already running may still finish, and work done before you stopped still uses credits. Send a new message to carry on.",
+    );
+  };
   const editAndResend = async (messageId: string, newText: string) => {
     if (await rewindTo(messageId)) sendText(newText);
   };
@@ -156,6 +168,14 @@ export function SamConversation({
             </div>
           ) : null}
 
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-sm text-base-content/60 empty:sr-only"
+          >
+            {stopNotice}
+          </p>
+
           {status === "error" ? (
             <p className="text-sm text-error">
               Something went wrong. Please try again.
@@ -184,6 +204,7 @@ export function SamConversation({
           <ChatComposer
             busy={isBusy}
             onSend={sendText}
+            onStop={stopTurn}
             placeholder="Ask SAM to research, analyze, or track anything…"
           />
         </div>

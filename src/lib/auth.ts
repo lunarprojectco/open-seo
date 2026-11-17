@@ -138,8 +138,7 @@ function createAuth() {
             }
             // Invite-only while billing is the placeholder ledger.
             if (
-              isHostedAuthMode(env.AUTH_MODE) &&
-              (await usesPlaceholderBilling()) &&
+              (await isInviteOnlySignup()) &&
               !isEmailAllowed(
                 user.email,
                 Reflect.get(env, "LUNAR_OPTIMIZE_ALLOWED_EMAILS") as
@@ -148,7 +147,8 @@ function createAuth() {
               )
             ) {
               throw new APIError("FORBIDDEN", {
-                message: "Sign-up is by invitation only for now.",
+                message:
+                  "Sign-up is by invitation only for now. Ask for one through the Project Lunar support page: https://mission-control.projectlunar.ai/support",
               });
             }
             // No mail provider: nothing can verify the address, so the
@@ -291,6 +291,12 @@ function getGoogleSocialProviderConfig() {
       name: profile.name,
     }),
   };
+}
+
+// Hosted sign-up is by invitation while billing is the placeholder ledger.
+// The auth options pass this to the sign-up page as inviteOnly.
+export async function isInviteOnlySignup() {
+  return isHostedAuthMode(env.AUTH_MODE) && (await usesPlaceholderBilling());
 }
 
 export function hasGoogleSocialConfig() {

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { getErrorCode } from "@/client/lib/error-messages";
+import { Modal } from "@/client/components/Modal";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { useKeywordResearchController } from "@/client/features/keywords/state/useKeywordResearchController";
 import type { KeywordResearchControllerInput } from "@/client/features/keywords/state/useKeywordResearchController";
@@ -218,7 +219,7 @@ export function KeywordResearchPage(input: Props) {
   );
 }
 
-function KeywordResearchContent({
+export function KeywordResearchContent({
   controller,
   projectId,
 }: {
@@ -236,7 +237,7 @@ function KeywordResearchContent({
     return (
       <div className="flex-1 flex items-center justify-center pt-1">
         <div className="w-full max-w-xl rounded-xl border border-error/30 bg-error/10 p-5 text-error space-y-3">
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2" role="alert">
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
             <p className="text-sm">{controller.researchError}</p>
           </div>
@@ -266,7 +267,7 @@ function KeywordResearchContent({
   return <KeywordResearchResults controller={controller} />;
 }
 
-function KeywordSaveDialog({
+export function KeywordSaveDialog({
   controller,
 }: {
   controller: KeywordResearchControllerState;
@@ -274,32 +275,33 @@ function KeywordSaveDialog({
   if (!controller.showSaveDialog) return null;
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">
-          Save {controller.selectedRows.size} Keywords
-        </h3>
-        <div className="py-4">
-          <p className="text-base-content/70 text-sm">
-            These keywords will be saved to your current project.
-          </p>
-        </div>
-        <div className="modal-action">
-          <button
-            className="btn"
-            onClick={() => controller.setShowSaveDialog(false)}
-          >
-            Cancel
-          </button>
-          <button className="btn btn-primary" onClick={controller.confirmSave}>
-            Save
-          </button>
-        </div>
+    <Modal
+      maxWidth="max-w-md"
+      onClose={() => controller.setShowSaveDialog(false)}
+      labelledBy="keyword-save-dialog-title"
+    >
+      <h3 id="keyword-save-dialog-title" className="font-bold text-lg">
+        Save {controller.selectedRows.size} Keywords
+      </h3>
+      <p className="text-base-content/70 text-sm">
+        These keywords will be saved to your current project.
+      </p>
+      <div className="flex justify-end gap-2">
+        <button
+          className="btn"
+          autoFocus
+          onClick={() => controller.setShowSaveDialog(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={controller.confirmSave}
+          disabled={controller.isSaving}
+        >
+          {controller.isSaving ? "Saving..." : "Save"}
+        </button>
       </div>
-      <div
-        className="modal-backdrop"
-        onClick={() => controller.setShowSaveDialog(false)}
-      />
-    </div>
+    </Modal>
   );
 }

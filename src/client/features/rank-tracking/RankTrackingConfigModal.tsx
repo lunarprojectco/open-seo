@@ -189,17 +189,22 @@ function RankTrackingConfigModalContent({
         <h2 id="rank-config-modal-title" className="text-lg font-semibold">
           {isEdit ? "Edit Domain Config" : "Add Domain"}
         </h2>
-        <button className="btn btn-ghost btn-sm btn-square" onClick={onClose}>
+        <button
+          className="btn btn-ghost btn-sm btn-square"
+          aria-label="Close"
+          onClick={onClose}
+        >
           <X className="size-4" />
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="rank-config-domain">
             <span className="label-text font-medium">Target Domain</span>
           </label>
           <input
+            id="rank-config-domain"
             type="text"
             placeholder="example.com"
             className="input input-bordered w-full"
@@ -233,10 +238,11 @@ function RankTrackingConfigModalContent({
         />
 
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="rank-config-language">
             <span className="label-text font-medium">Language</span>
           </label>
           <select
+            id="rank-config-language"
             className="select select-bordered w-full"
             value={languageCode}
             onChange={(e) => setLanguageCode(e.target.value)}
@@ -254,10 +260,11 @@ function RankTrackingConfigModalContent({
         </div>
 
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="rank-config-devices">
             <span className="label-text font-medium">Devices</span>
           </label>
           <select
+            id="rank-config-devices"
             className="select select-bordered w-full"
             value={devices}
             onChange={(e) => {
@@ -290,10 +297,11 @@ function RankTrackingConfigModalContent({
         </div>
 
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="rank-config-schedule">
             <span className="label-text font-medium">Schedule</span>
           </label>
           <select
+            id="rank-config-schedule"
             className="select select-bordered w-full"
             value={schedule}
             onChange={(e) => {
@@ -322,10 +330,11 @@ function RankTrackingConfigModalContent({
         </div>
 
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="rank-config-depth">
             <span className="label-text font-medium">Search Depth</span>
           </label>
           <select
+            id="rank-config-depth"
             className="select select-bordered w-full"
             value={depthToPages(serpDepth)}
             onChange={(e) => setSerpDepth(pagesToDepth(Number(e.target.value)))}

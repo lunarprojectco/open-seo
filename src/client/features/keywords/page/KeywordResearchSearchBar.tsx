@@ -79,6 +79,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
             <controlsForm.Field name="resultLimit">
               {(field) => (
                 <select
+                  aria-label="Number of results"
                   className="select select-bordered w-full lg:w-auto lg:shrink-0"
                   value={field.state.value}
                   onChange={(event) => {
@@ -98,6 +99,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
             <controlsForm.Field name="mode">
               {(field) => (
                 <select
+                  aria-label="Research mode"
                   className="select select-bordered w-full lg:w-auto lg:shrink-0"
                   value={field.state.value}
                   onChange={(event) =>

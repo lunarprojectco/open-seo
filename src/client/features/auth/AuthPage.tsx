@@ -98,6 +98,37 @@ function GoogleLogo() {
   );
 }
 
+// Same sentence and support page as the welcome page. Sign-up is by
+// invitation while billing is the placeholder ledger; the line shows until the
+// auth options say inviteOnly: false.
+const SUPPORT_URL = "https://mission-control.projectlunar.ai/support";
+
+export function isSignUpInviteOnly(options: unknown) {
+  return Reflect.get(Object(options), "inviteOnly") !== false;
+}
+
+export function SignUpInvitationNotice() {
+  const options = useQuery({
+    queryKey: ["auth-options"],
+    queryFn: () => getAuthOptions(),
+    staleTime: Infinity,
+  });
+  if (!isSignUpInviteOnly(options.data)) return null;
+
+  return (
+    <p className="text-sm text-base-content/70">
+      Sign-up is by invitation while billing is set up. Ask for one through the{" "}
+      <a
+        href={SUPPORT_URL}
+        className="text-base-content underline underline-offset-2 hover:text-base-content/80 transition-colors"
+      >
+        Project Lunar support page
+      </a>
+      .
+    </p>
+  );
+}
+
 export function AuthPageCard({
   title,
   helperText,
@@ -141,7 +172,9 @@ export function AuthPageShell({ children }: { children: React.ReactNode }) {
     // bottom) when it's taller than the viewport. Plain `justify-center` clips
     // the overflow with no way to scroll to it.
     <div className="h-[100dvh] flex flex-col items-center overflow-y-auto p-4 bg-base-200">
-      <div className="m-auto flex w-full flex-col items-center">{children}</div>
+      <main className="m-auto flex w-full flex-col items-center">
+        {children}
+      </main>
     </div>
   );
 }

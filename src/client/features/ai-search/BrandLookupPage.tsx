@@ -63,6 +63,27 @@ const BRAND_LOOKUP_BULLETS = [
   },
 ];
 
+// True when a submit would land on the lookup already in the URL. The query
+// key would not change, so a failed lookup has to be refetched instead.
+export function isSameBrandLookup(
+  submitted: {
+    query: string;
+    competitors: string[];
+    scope: ResearchScope | undefined;
+  },
+  active: {
+    query: string;
+    competitorKey: string;
+    scope: ResearchScope | undefined;
+  },
+) {
+  return (
+    submitted.query.trim() === active.query.trim() &&
+    submitted.competitors.join(",") === active.competitorKey &&
+    submitted.scope === active.scope
+  );
+}
+
 export function BrandLookupPage(props: Props) {
   return (
     <HostedPlanGate>
@@ -234,6 +255,18 @@ function BrandLookupPageInner({
     const explicitScope = scopeTarget
       ? toScopeSearchParam(trimmed, selectedScope)
       : undefined;
+    if (
+      // A failed lookup, or one that measured nothing (sample data), is asked again.
+      (lookupQuery.isError || lookupQuery.data?.notMeasured === true) &&
+      !lookupQuery.isFetching &&
+      isSameBrandLookup(
+        { query: trimmed, competitors, scope: explicitScope },
+        { query: trimmedInitialQuery, competitorKey, scope: initialScope },
+      )
+    ) {
+      void lookupQuery.refetch();
+      return;
+    }
     onSearchChange(trimmed, competitors, explicitScope);
   };
 
@@ -250,6 +283,7 @@ function BrandLookupPageInner({
   }, [initialQuery, competitorKey, initialScope]);
 
   const isLoading = hasActiveQuery && lookupQuery.isPending;
+  const isRetrying = lookupQuery.isError && lookupQuery.isFetching;
   const errorMessage =
     hasActiveQuery && lookupQuery.isError
       ? getStandardErrorMessage(lookupQuery.error)
@@ -289,7 +323,7 @@ function BrandLookupPageInner({
                 if (validationError) setValidationError(null);
               }}
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isLoading || isRetrying}
               validationError={validationError}
             />
 
@@ -299,7 +333,15 @@ function BrandLookupPageInner({
                 className="flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error"
               >
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <span>{errorMessage}</span>
+                <span className="flex-1">{errorMessage}</span>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={isRetrying}
+                  onClick={() => void lookupQuery.refetch()}
+                >
+                  {isRetrying ? "Trying again..." : "Try again"}
+                </button>
               </div>
             ) : null}
 

@@ -1,6 +1,10 @@
 import * as React from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { Menu } from "lucide-react";
 import {
   MobileSidebarDrawer,
@@ -12,6 +16,42 @@ import { BILLING_ROUTE } from "@/shared/billing";
 import { getSeoApiKeyStatus } from "@/serverFunctions/config";
 import { getProjects } from "@/serverFunctions/projects";
 import { getLastProjectId } from "@/client/lib/active-project";
+
+/**
+ * A data call that falls back to sample data flips the server's sample flag,
+ * so re-read the status (debounced) whenever any other query or mutation
+ * settles. Returns the unsubscribe.
+ */
+export function refreshSampleStatusOnSettle(
+  queryClient: QueryClient,
+  delayMs = 500,
+): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const schedule = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      void queryClient.invalidateQueries({ queryKey: ["seoApiKeyStatus"] });
+    }, delayMs);
+  };
+  const stopQueries = queryClient.getQueryCache().subscribe((event) => {
+    if (event.type !== "updated") return;
+    if (event.query.queryKey[0] === "seoApiKeyStatus") return;
+    if (event.action.type === "success" || event.action.type === "error") {
+      schedule();
+    }
+  });
+  const stopMutations = queryClient.getMutationCache().subscribe((event) => {
+    if (event.type !== "updated") return;
+    if (event.action.type === "success" || event.action.type === "error") {
+      schedule();
+    }
+  });
+  return () => {
+    clearTimeout(timer);
+    stopQueries();
+    stopMutations();
+  };
+}
 
 export function AuthenticatedAppLayout({
   children,
@@ -55,7 +95,13 @@ export function AuthenticatedAppLayout({
     queryKey: ["seoApiKeyStatus"],
     queryFn: () => getSeoApiKeyStatus(),
     enabled: shouldCheckSeoApiKeyStatus,
+    staleTime: 0,
   });
+  const queryClient = useQueryClient();
+  React.useEffect(
+    () => refreshSampleStatusOnSettle(queryClient),
+    [queryClient],
+  );
   const seoApiKeyStatusError =
     shouldCheckSeoApiKeyStatus && seoApiKeyStatusQuery.isError;
   // Sample mode (no key, or DataForSEO out of credits) is labelled, never a blocker.
@@ -87,7 +133,7 @@ export function AuthenticatedAppLayout({
 
             {banner}
 
-            <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+            <main className="min-h-0 flex-1 overflow-auto">{children}</main>
           </div>
         </div>
       </div>

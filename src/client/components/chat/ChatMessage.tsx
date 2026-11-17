@@ -104,7 +104,7 @@ function MessageActions({
 }) {
   return (
     <div
-      className={`flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 ${
+      className={`flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-100 ${
         message.role === "user" ? "justify-end" : ""
       }`}
     >

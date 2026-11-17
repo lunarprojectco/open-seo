@@ -230,7 +230,9 @@ function ResetPasswordPage() {
                             required
                           />
                           {error ? (
-                            <p className="mt-1 text-sm text-error">{error}</p>
+                            <p className="mt-1 text-sm text-error" role="alert">
+                              {error}
+                            </p>
                           ) : null}
                         </div>
                       );
@@ -257,7 +259,9 @@ function ResetPasswordPage() {
                             required
                           />
                           {error ? (
-                            <p className="mt-1 text-sm text-error">{error}</p>
+                            <p className="mt-1 text-sm text-error" role="alert">
+                              {error}
+                            </p>
                           ) : null}
                         </div>
                       );
@@ -265,7 +269,9 @@ function ResetPasswordPage() {
                   </form.Field>
 
                   {errorMessage ? (
-                    <p className="text-sm text-error">{errorMessage}</p>
+                    <p className="text-sm text-error" role="alert">
+                      {errorMessage}
+                    </p>
                   ) : null}
                   <button
                     className="btn btn-soft w-full"

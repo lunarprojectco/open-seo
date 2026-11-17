@@ -112,7 +112,8 @@ function SearchHistoryState({
                   </span>
                   <button
                     type="button"
-                    className="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 p-1"
+                    className="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1"
+                    aria-label={`Remove ${item.keyword} from recent searches`}
                     onClick={() => removeHistoryItem(item.timestamp)}
                   >
                     <X className="size-3" />

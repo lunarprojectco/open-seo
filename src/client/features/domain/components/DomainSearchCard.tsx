@@ -93,6 +93,7 @@ export function DomainSearchCard({
             {(field) => (
               <select
                 className="select select-bordered shrink-0"
+                aria-label="Sort results"
                 value={field.state.value}
                 onChange={(event) => {
                   const next = toSortMode(event.target.value) ?? "traffic";

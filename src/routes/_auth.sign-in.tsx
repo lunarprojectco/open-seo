@@ -166,7 +166,9 @@ function SignInPage() {
             }}
           />
           {socialError ? (
-            <p className="text-sm text-error">{socialError}</p>
+            <p className="text-sm text-error" role="alert">
+              {socialError}
+            </p>
           ) : null}
         </>
       ) : (
@@ -194,7 +196,9 @@ function SignInPage() {
                     required
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -218,7 +222,9 @@ function SignInPage() {
                     required
                   />
                   {error ? (
-                    <p className="mt-1 text-sm text-error">{error}</p>
+                    <p className="mt-1 text-sm text-error" role="alert">
+                      {error}
+                    </p>
                   ) : null}
                 </div>
               );
@@ -236,7 +242,9 @@ function SignInPage() {
               return (
                 <>
                   {errorMessage ? (
-                    <p className="text-sm text-error">{errorMessage}</p>
+                    <p className="text-sm text-error" role="alert">
+                      {errorMessage}
+                    </p>
                   ) : null}
                   <button
                     className="btn btn-soft w-full"

@@ -232,7 +232,11 @@ export function KeywordSuggestionStep({
       <h2 id="keyword-suggestions-title" className="text-lg font-semibold">
         {title}
       </h2>
-      <button className="btn btn-ghost btn-sm btn-square" onClick={onClose}>
+      <button
+        className="btn btn-ghost btn-sm btn-square"
+        aria-label="Close"
+        onClick={onClose}
+      >
         <X className="size-4" />
       </button>
     </div>

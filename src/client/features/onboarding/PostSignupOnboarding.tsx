@@ -26,6 +26,7 @@ type PostSignupOnboardingProps = {
   onSkip: () => void;
   onFinish: () => void;
   isSaving: boolean;
+  finishError?: string | null;
   accountMenu: ReactNode;
 };
 
@@ -41,6 +42,7 @@ export function PostSignupOnboarding({
   onSkip,
   onFinish,
   isSaving,
+  finishError,
   accountMenu,
 }: PostSignupOnboardingProps) {
   const canContinue =
@@ -161,11 +163,22 @@ export function PostSignupOnboarding({
               disabled={isSaving}
               onClick={onFinish}
             >
-              Finish
-              <ArrowRight className="size-4" />
+              {isSaving ? (
+                "Saving..."
+              ) : (
+                <>
+                  Finish
+                  <ArrowRight className="size-4" />
+                </>
+              )}
             </button>
           )}
         </div>
+        {step === ONBOARDING_LAST_STEP && finishError ? (
+          <p role="alert" className="mt-3 text-sm text-error">
+            {finishError}
+          </p>
+        ) : null}
       </div>
     </div>
   );

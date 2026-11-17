@@ -29,18 +29,28 @@ export const Route = createFileRoute("/verify-email")({
   component: VerifyEmailPage,
 });
 
-function getVerificationErrorMessage(error: string | undefined) {
+// With the address known the page offers Resend email; without it the only
+// way to a new email is signing in, so the copy says that instead.
+function getVerificationErrorMessage(
+  error: string | undefined,
+  canResend: boolean,
+) {
   switch ((error ?? "").toLowerCase()) {
     case "invalid_token":
-      return "This link is no longer valid. Request a new email to keep going.";
+      return canResend
+        ? "This link is no longer valid. Request a new email to keep going."
+        : "This link is no longer valid. Sign in to request a new email.";
     case "token_expired":
-      return "This link has expired. Request a new email to keep going.";
+      return canResend
+        ? "This link has expired. Request a new email to keep going."
+        : "This link has expired. Sign in to request a new email.";
     case "user_not_found":
       return "We couldn't find this account anymore. Try creating it again.";
     default:
-      return error
+      if (!error) return null;
+      return canResend
         ? "We couldn't confirm this email. Request a new email and try again."
-        : null;
+        : "We couldn't confirm this email. Sign in to request a new email.";
   }
 }
 
@@ -103,11 +113,16 @@ function VerifyEmailPage() {
   const isHostedMode = isHostedClientAuthMode();
   const { data: session, isPending } = useSession();
   const bypassEmailVerification = isEmailVerificationBypassed();
-  const errorMessage = getVerificationErrorMessage(search.error);
   const verificationIssueType = search.error
     ? verificationIssueSchema.parse(search.error)
     : null;
   const email = search.email ?? session?.user?.email;
+  const canResendAfterError =
+    Boolean(email) && verificationIssueType !== "user_not_found";
+  const errorMessage = getVerificationErrorMessage(
+    search.error,
+    canResendAfterError,
+  );
   const isVerified = !!session?.user?.emailVerified;
   const [isResending, setIsResending] = useState(false);
   // Verified (or bypass) users are sent on to the app by the effect below; until
@@ -186,6 +201,17 @@ function VerifyEmailPage() {
     }
   }
 
+  const resendButton = (
+    <button
+      type="button"
+      className="btn btn-soft w-full"
+      onClick={() => void handleResend()}
+      disabled={isResending}
+    >
+      {isResending ? "Sending email..." : "Resend email"}
+    </button>
+  );
+
   return (
     <AuthPageShell>
       <AuthPageCard
@@ -205,30 +231,27 @@ function VerifyEmailPage() {
       >
         {!isHostedMode ? null : errorMessage ? (
           <div className="space-y-3">
-            <div className="alert alert-error">
+            <div className="alert alert-error" role="alert">
               <span>{errorMessage}</span>
             </div>
-            <Link
-              to="/sign-in"
-              search={getSignInSearch(redirectTo)}
-              className="btn btn-soft w-full"
-            >
-              Back to sign in
-            </Link>
+            {canResendAfterError ? (
+              resendButton
+            ) : (
+              <Link
+                to="/sign-in"
+                search={getSignInSearch(redirectTo)}
+                className="btn btn-soft w-full"
+              >
+                Back to sign in
+              </Link>
+            )}
           </div>
         ) : isPending || isRedirecting ? (
           <div className="flex justify-center py-4">
             <span className="loading loading-spinner loading-md" />
           </div>
         ) : email ? (
-          <button
-            type="button"
-            className="btn btn-soft w-full"
-            onClick={() => void handleResend()}
-            disabled={isResending}
-          >
-            {isResending ? "Sending email..." : "Resend email"}
-          </button>
+          resendButton
         ) : null}
       </AuthPageCard>
     </AuthPageShell>

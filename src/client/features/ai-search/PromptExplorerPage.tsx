@@ -58,6 +58,22 @@ const PROMPT_EXPLORER_BULLETS = [
   },
 ];
 
+// True when a submit would land on the search already in the URL. The query
+// key would not change, so a failed search has to be refetched instead.
+export function isSamePromptExplorerSearch(
+  submitted: PromptExplorerFormValues,
+  active: PromptExplorerFormValues,
+) {
+  return (
+    submitted.prompt.trim() === active.prompt.trim() &&
+    submitted.highlightBrand.trim() === active.highlightBrand.trim() &&
+    submitted.models.toSorted().join(",") ===
+      active.models.toSorted().join(",") &&
+    submitted.webSearch === active.webSearch &&
+    submitted.webSearchCountryCode === active.webSearchCountryCode
+  );
+}
+
 export function PromptExplorerPage(props: Props) {
   return (
     <HostedPlanGate>
@@ -174,6 +190,14 @@ function PromptExplorerPageInner({
       return;
     }
     setValidationError(null);
+    if (
+      exploreQuery.isError &&
+      !exploreQuery.isFetching &&
+      isSamePromptExplorerSearch(form, urlState)
+    ) {
+      void exploreQuery.refetch();
+      return;
+    }
     onSubmit({
       ...form,
       prompt: trimmed,
@@ -185,6 +209,7 @@ function PromptExplorerPageInner({
     ? getStandardErrorMessage(exploreQuery.error)
     : null;
   const isLoading = hasActivePrompt && exploreQuery.isPending;
+  const isRetrying = exploreQuery.isError && exploreQuery.isFetching;
   const resultData = hasActivePrompt ? exploreQuery.data : undefined;
 
   const updateForm = <K extends keyof PromptExplorerFormValues>(
@@ -226,7 +251,7 @@ function PromptExplorerPageInner({
                 updateForm("webSearchCountryCode", value)
               }
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isLoading || isRetrying}
               validationError={validationError}
             />
 
@@ -236,7 +261,15 @@ function PromptExplorerPageInner({
                 className="flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error"
               >
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <span>{errorMessage}</span>
+                <span className="flex-1">{errorMessage}</span>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={isRetrying}
+                  onClick={() => void exploreQuery.refetch()}
+                >
+                  {isRetrying ? "Trying again..." : "Try again"}
+                </button>
               </div>
             ) : null}
 

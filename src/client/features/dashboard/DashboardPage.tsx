@@ -298,7 +298,10 @@ export function DashboardPage({ projectId }: { projectId: string }) {
     );
   }
 
-  const showBacklinks = activation.domain !== null;
+  // A failed overview must not read as "no audits, no rankings": its cards
+  // are replaced by an alert with Retry.
+  const overviewFailed = overviewQuery.isError;
+  const showBacklinks = activation.domain !== null && !overviewFailed;
   const gscConnected = activation.gsc.connected;
   const ga4Connected = activation.ga4.connected;
 
@@ -311,12 +314,31 @@ export function DashboardPage({ projectId }: { projectId: string }) {
 
         <OnboardingChecklist projectId={projectId} activation={activation} />
 
-        <WhatChangedCard
-          projectId={projectId}
-          gscConnected={gscConnected}
-          rank={overview?.rank ?? null}
-          audit={overview?.audit ?? null}
-        />
+        {overviewFailed ? (
+          <div role="alert" className="alert alert-error">
+            <span>
+              {getStandardErrorMessage(
+                overviewQuery.error,
+                "Couldn't load your audit and ranking summary.",
+              )}
+            </span>
+            <button
+              type="button"
+              className="btn btn-sm"
+              disabled={overviewQuery.isFetching}
+              onClick={() => void overviewQuery.refetch()}
+            >
+              {overviewQuery.isFetching ? "Retrying..." : "Retry"}
+            </button>
+          </div>
+        ) : (
+          <WhatChangedCard
+            projectId={projectId}
+            gscConnected={gscConnected}
+            rank={overview?.rank ?? null}
+            audit={overview?.audit ?? null}
+          />
+        )}
 
         {/* Every card is half width on large screens (only the checklist spans).
           Cards with data render before setup pitches and empty states. */}
@@ -354,16 +376,20 @@ export function DashboardPage({ projectId }: { projectId: string }) {
                   },
                 ]
               : []),
-            {
-              key: "audit",
-              hasData: overview?.audit != null,
-              node: (
-                <AuditHealthCard
-                  projectId={projectId}
-                  audit={overview?.audit ?? null}
-                />
-              ),
-            },
+            ...(overviewFailed
+              ? []
+              : [
+                  {
+                    key: "audit",
+                    hasData: overview?.audit != null,
+                    node: (
+                      <AuditHealthCard
+                        projectId={projectId}
+                        audit={overview?.audit ?? null}
+                      />
+                    ),
+                  },
+                ]),
             ...(showBacklinks
               ? [
                   {

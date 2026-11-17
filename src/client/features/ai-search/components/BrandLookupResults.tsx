@@ -8,10 +8,11 @@ import {
   PLATFORM_DOT_CLASS,
 } from "@/client/features/ai-search/platformLabels";
 import type { BrandLookupResult } from "@/types/schemas/ai-search";
+import type { BrandLookupResponse } from "@/server/features/ai-search/services/brandLookup";
 import { RESEARCH_SCOPE_LABELS } from "@/shared/researchScope";
 
 type Props = {
-  result: BrandLookupResult;
+  result: BrandLookupResponse;
   projectId: string;
 };
 
@@ -37,6 +38,16 @@ function DomainLevelBadge() {
 }
 
 export function BrandLookupResults({ result, projectId }: Props) {
+  if (result.notMeasured) {
+    return (
+      <div className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm">
+        AI mention data needs a live DataForSEO connection, so nothing was
+        measured for <strong>{result.resolvedTarget}</strong>. Add
+        DATAFORSEO_API_KEY or top up credits, then search again.
+      </div>
+    );
+  }
+
   if (!result.hasData) {
     const erroredPlatforms = result.perPlatform.filter(
       (p) => p.status === "error",

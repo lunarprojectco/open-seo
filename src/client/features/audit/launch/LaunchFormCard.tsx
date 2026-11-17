@@ -99,10 +99,16 @@ function LaunchOptions({
         Crawl limit
       </label>
       <div className="flex items-center gap-2">
-        <span className="text-sm text-base-content/70">Max pages</span>
+        <label
+          htmlFor="audit-max-pages"
+          className="text-sm text-base-content/70"
+        >
+          Max pages
+        </label>
         <launchForm.Field name="maxPagesInput">
           {(field) => (
             <input
+              id="audit-max-pages"
               type="number"
               min={MIN_PAGES}
               max={maxPagesLimit}

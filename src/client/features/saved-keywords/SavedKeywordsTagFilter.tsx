@@ -197,6 +197,7 @@ function TagFilterPopover({
             <button
               type="button"
               className="text-base-content/40 hover:text-base-content"
+              aria-label="Clear tag search"
               onClick={() => onQueryChange("")}
             >
               <X className="size-3.5" />

@@ -248,6 +248,7 @@ export function useKeywordResearchController(
     history,
     historyLoaded,
     isLoading,
+    isSaving: saveMutation.isPending,
     lastResultSource,
     lastSearchError,
     lastSearchKeyword,

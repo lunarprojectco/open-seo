@@ -260,7 +260,11 @@ function SubscribePage() {
           </li>
         </ul>
 
-        {error ? <p className="text-sm text-error">{error}</p> : null}
+        {error ? (
+          <p role="alert" className="text-sm text-error">
+            {error}
+          </p>
+        ) : null}
 
         <button
           className="btn btn-soft w-full"

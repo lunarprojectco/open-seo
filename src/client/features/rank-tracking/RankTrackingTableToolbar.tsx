@@ -105,6 +105,13 @@ export function RankTrackingTableToolbar({
         </span>
       )}
 
+      {!isRunning && latestRun?.status === "failed" ? (
+        <span role="alert" className="text-sm text-error">
+          The last rank check failed. Choose Check rankings under More actions
+          to try again.
+        </span>
+      ) : null}
+
       <div className="flex-1" />
 
       <ExportMenu

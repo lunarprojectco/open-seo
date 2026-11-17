@@ -10,6 +10,7 @@ import {
   setCached,
 } from "@/server/lib/r2-cache";
 import { safeHostname, safeHttpUrl } from "@/server/features/ai-search/safeUrl";
+import { dataforseoSampleReason } from "@/server/lib/dataforseo/sample";
 import {
   promptExplorerModelResultSchema,
   type PromptExplorerCitation,
@@ -117,6 +118,16 @@ async function runModel(
   }
 
   const rawResponse = await fetchModelResponse(args);
+  // Sample mode has no model answers: an empty sample is not a real reply.
+  if (dataforseoSampleReason() !== null) {
+    return {
+      status: "error" as const,
+      model: args.model,
+      errorCode: "UPSTREAM_ERROR",
+      message:
+        "This answer needs a live DataForSEO connection, so nothing was measured. Add DATAFORSEO_API_KEY or top up credits, then run the prompt again.",
+    };
+  }
   const shaped = shapeSuccess(args.model, rawResponse);
 
   waitUntil(

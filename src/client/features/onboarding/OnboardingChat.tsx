@@ -1,9 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { DEFAULT_LOCATION_CODE } from "@/shared/keyword-locations";
 import { LocationSelect } from "@/client/components/LocationSelect";
 import { LunarMark } from "@/client/components/LunarMark";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { useSession } from "@/lib/auth-client";
 import { saveOnboardingSite } from "@/serverFunctions/onboardingChat";
 import { OnboardingAccountMenu } from "./OnboardingAccountMenu";
@@ -71,6 +73,10 @@ function SiteForm({ projectId }: { projectId: string }) {
     mutationFn: () =>
       saveOnboardingSite({ data: { projectId, domain, locationCode } }),
     onSuccess: invalidateOnboardingChatState,
+    onError: (error) =>
+      toast.error(
+        getStandardErrorMessage(error, "Couldn't save your website. Try again."),
+      ),
   });
 
   return (

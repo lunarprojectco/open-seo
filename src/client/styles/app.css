@@ -165,6 +165,20 @@ select {
   padding-bottom: 0;
 }
 
+/* Reduced motion: nothing keeps moving. The daisyUI spinner animates inside its SVG mask, so it gets a still ring. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .animate-ping,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none;
+  }
+
+  .loading {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round' stroke-dasharray='42 150'/%3E%3C/svg%3E");
+  }
+}
+
 /* Touch device optimizations */
 @media (pointer: coarse) {
   html {

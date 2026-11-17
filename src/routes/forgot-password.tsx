@@ -97,58 +97,72 @@ function ForgotPasswordPage() {
                 </p>
               }
             >
-              {isSuccess ? (
-                <div className="alert alert-success">
-                  <span>
-                    If an account exists for that email, you'll receive password
-                    reset instructions shortly.
-                  </span>
-                </div>
-              ) : (
-                <form
-                  className="space-y-4"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void form.handleSubmit();
-                  }}
-                >
-                  <form.Field name="email">
-                    {(field) => {
-                      const error = getFieldError(field.state.meta.errors);
-
-                      return (
-                        <div>
-                          <input
-                            type="email"
-                            className="input input-bordered w-full"
-                            placeholder="Email address..."
-                            value={field.state.value}
-                            onChange={(event) =>
-                              field.handleChange(event.target.value)
-                            }
-                            autoComplete="email"
-                            disabled={!isHostedMode}
-                            required
-                          />
-                          {error ? (
-                            <p className="mt-1 text-sm text-error">{error}</p>
-                          ) : null}
-                        </div>
-                      );
-                    }}
-                  </form.Field>
-
-                  {errorMessage ? (
-                    <p className="text-sm text-error">{errorMessage}</p>
+              <div>
+                <div role="status" aria-live="polite">
+                  {isSuccess ? (
+                    <div className="alert alert-success">
+                      <span>
+                        If an account exists for that email, you'll receive
+                        password reset instructions shortly.
+                      </span>
+                    </div>
                   ) : null}
-                  <button
-                    className="btn btn-soft w-full"
-                    disabled={!isHostedMode || isSubmitting}
+                </div>
+                {isSuccess ? null : (
+                  <form
+                    className="space-y-4"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void form.handleSubmit();
+                    }}
                   >
-                    {isSubmitting ? "Sending reset link..." : "Send reset link"}
-                  </button>
-                </form>
-              )}
+                    <form.Field name="email">
+                      {(field) => {
+                        const error = getFieldError(field.state.meta.errors);
+
+                        return (
+                          <div>
+                            <input
+                              type="email"
+                              className="input input-bordered w-full"
+                              placeholder="Email address..."
+                              value={field.state.value}
+                              onChange={(event) =>
+                                field.handleChange(event.target.value)
+                              }
+                              autoComplete="email"
+                              disabled={!isHostedMode}
+                              required
+                            />
+                            {error ? (
+                              <p
+                                className="mt-1 text-sm text-error"
+                                role="alert"
+                              >
+                                {error}
+                              </p>
+                            ) : null}
+                          </div>
+                        );
+                      }}
+                    </form.Field>
+
+                    {errorMessage ? (
+                      <p className="text-sm text-error" role="alert">
+                        {errorMessage}
+                      </p>
+                    ) : null}
+                    <button
+                      className="btn btn-soft w-full"
+                      disabled={!isHostedMode || isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Sending reset link..."
+                        : "Send reset link"}
+                    </button>
+                  </form>
+                )}
+              </div>
             </AuthPageCard>
           );
         }}

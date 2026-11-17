@@ -10,6 +10,7 @@ import {
 import type { LlmCrossAggregatedItem } from "@/server/lib/dataforseoLlmSchemas";
 import { AppError } from "@/server/lib/errors";
 import { buildCacheKey, getCached, setCached } from "@/server/lib/r2-cache";
+import { dataforseoSampleReason } from "@/server/lib/dataforseo/sample";
 import {
   resolveCompetitorGroups,
   type CompetitorGroup,
@@ -48,10 +49,13 @@ const PLATFORMS: LlmPlatform[] = ["chat_gpt", "google"];
 const MENTIONS_PER_PLATFORM = 100;
 const TOP_SOURCES_PER_PLATFORM = 10;
 
+/** notMeasured: DataForSEO answered with sample data, so nothing was measured. */
+export type BrandLookupResponse = BrandLookupResult & { notMeasured?: true };
+
 export async function getBrandLookup(
   input: BrandLookupInput,
   billingCustomer: BillingCustomerContext,
-): Promise<BrandLookupResult> {
+): Promise<BrandLookupResponse> {
   const detected = detectTarget(input.query);
   const researchTarget = resolveResearchTarget(input, detected);
   // The LLM mentions API only scopes a domain target by subdomain inclusion;
@@ -163,6 +167,11 @@ export async function getBrandLookup(
     userLocationCode: input.locationCode,
     userLanguageCode: input.languageCode,
   });
+
+  // Sample mode has no AI mention data: an empty sample is not "no mentions".
+  if (dataforseoSampleReason() !== null) {
+    return { ...result, hasData: false, notMeasured: true };
+  }
 
   // Only cache when every call succeeded — a platform bundle that swallowed a
   // failed sub-call into empty fallback data is renderable but must not be
